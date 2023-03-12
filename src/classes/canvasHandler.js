@@ -1,5 +1,27 @@
 import weapons from '../content/weapons.js'
 
+function turnClockwise(alpha, beta) {
+  const delta = 360 - alpha
+  beta = beta + delta
+  beta = beta % 360
+  return beta < 180 ? true : false
+}
+
+function turnWeapon(target, currentAngle, actualAngle, change) {
+  if (Math.abs(currentAngle - actualAngle) < change || Math.abs(actualAngle - currentAngle) < change) {
+    target.position.viewAngle = actualAngle
+  } else {
+    if (turnClockwise(currentAngle + 180, actualAngle + 180)) {
+      target.position.viewAngle += change
+    } else {
+      target.position.viewAngle -= change
+    }
+  }
+  
+  if (target.position.viewAngle > 180) target.position.viewAngle -= 360
+  if (target.position.viewAngle < -180) target.position.viewAngle += 360
+}
+
 export default class CanvasHandler {
   constructor(game, player, location, p2pHandler) {
     this.game = game
@@ -146,7 +168,24 @@ export default class CanvasHandler {
       // console.log('drawing peer', this.player.acquaintances[peerId])
       
       const peer = this.player.acquaintances[peerId]
-      if (!peer || !peer.position) return
+      if (!peer || !peer.newPosition) return
+      if (!peer.position) peer.position = peer.newPosition
+      if (peer.newPosition.x !== peer.position.x || peer.newPosition.y !== peer.position.y) {
+        const distance = peer.stats.speed
+        if (peer.newPosition.x > peer.position.x) {
+          peer.position.x += distance
+        }
+        if (peer.newPosition.x < peer.position.x) {
+          peer.position.x -= distance
+        }
+        if (peer.newPosition.y > peer.position.y) {
+          peer.position.y += distance
+        }
+        if (peer.newPosition.y < peer.position.y) {
+          peer.position.y -= distance
+        }
+      }
+
       const peerX = this.offsetX + peer.position.x
       const peerY = this.offsetY + peer.position.y
       this.drawRect(peerX, peerY, 16, 16, peer.color || 'white')
@@ -177,12 +216,30 @@ export default class CanvasHandler {
           return
         }
         
+
+
+        peer.position.viewAngle
+        const actualAngle = peer.newPosition.viewAngle
+        const change = peer.stats.strength / peer.weapon.weight * 2
+
+        if (Math.abs(peer.position.viewAngle - actualAngle) < change || Math.abs(actualAngle - peer.position.viewAngle) < change) {
+          peer.position.viewAngle = actualAngle
+        } else {
+          if (turnClockwise(peer.position.viewAngle + 180, actualAngle + 180)) {
+            peer.position.viewAngle += change
+          } else {
+            peer.position.viewAngle -= change
+          }
+        }
+        if (peer.position.viewAngle > 180) peer.position.viewAngle -= 360
+        if (peer.position.viewAngle < -180) peer.position.viewAngle += 360
+        
         peer.weapon.draw = weapons[peer.weapon.name].draw
         this.drawWeapon({ 
           weapon: peer.weapon, 
           context: this.ctx, 
           target: peer, 
-          center: { x: this.offsetX + peer.position.x + this.playerWidth, y: this.offsetY + peer.position.y + this.playerHeight } 
+          center: { x: this.offsetX + peer.position.x + (this.playerWidth / 2), y: this.offsetY + peer.position.y + (this.playerHeight / 2) } 
         })
       }
     })
@@ -191,15 +248,18 @@ export default class CanvasHandler {
   clear() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
+  
+  
 
   update() {
-    // this.player.position.movementDirection.x = 0
-    // this.player.position.movementDirection.y = 0
-
+    const currentAngle = this.player.position.viewAngle
     const playerMouseXDiff = (this.canvas.width / 2) - this.mouse.x
     const playerMouseYDiff = (this.canvas.height / 2) - this.mouse.y
-    this.player.position.viewAngle = Math.atan2(playerMouseYDiff, playerMouseXDiff) * 180 / Math.PI
-    // console.log(this.player.position.x, this.player.position.y)
+    const actualAngle = Math.atan2(playerMouseYDiff, playerMouseXDiff) * 180 / Math.PI
+    const change = this.player.stats.strength / this.player.equipped.weapons.primary.weight * 2
+    
+    turnWeapon(this.player, currentAngle, actualAngle, change)
+
     let xDiff = 0
     let yDiff = 0
     if (this.keysPressed['w'] || this.keysPressed['ArrowUp']) {

@@ -10,7 +10,7 @@ class PlayerPeer {
 
     this.stats = null
     this.position = null
-    this.previousPosition = null
+    this.newPosition = null
     this.weapon = null
     this.color = '#555555'
     this.name = 'Peer'
@@ -21,9 +21,9 @@ class PlayerPeer {
     // const midX = (this._peers[peerId].x ? (this._peers[peerId].x + data.x) / 2 : 0) + this._position.x
     // const midY = (this._peers[peerId].y ? (this._peers[peerId].y + data.y) / 2 : 0) + this._position.y
     // const midAngle = this._peers[peerId].viewAngle ? ((180 + this._peers[peerId].viewAngle + data.viewAngle) / 2) - 180 : 0
-    this.previousPosition = this.position
+    // this.previousPosition = this.position
 
-    this.position = {
+    this.newPosition = {
       ...this.position,
       ...data
     }

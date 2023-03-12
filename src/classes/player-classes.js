@@ -108,19 +108,19 @@ export class PaladinGnome extends Player {
   }
 }
 
-export class RangerGnome extends Player {
-  constructor() {
-    super();
-     this.className =  'Ranger';
-    this.stats.dexterity += 2;
-    this.stats.wisdom += 1;
-    this.equipped.equipWeapon(bow);
-    this.equipped.equipArmor(leatherArmor);
-    this.equipped.equipArmor(leatherPants);
-    this.inventory.add(new Item());
-    this.inventory.add(new Item());
-  }
-}
+// export class RangerGnome extends Player {
+//   constructor() {
+//     super();
+//      this.className =  'Ranger';
+//     this.stats.dexterity += 2;
+//     this.stats.wisdom += 1;
+//     this.equipped.equipWeapon(bow);
+//     this.equipped.equipArmor(leatherArmor);
+//     this.equipped.equipArmor(leatherPants);
+//     this.inventory.add(new Item());
+//     this.inventory.add(new Item());
+//   }
+// }
 
 export class DruidGnome extends Player {
   constructor() {
