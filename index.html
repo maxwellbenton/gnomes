@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      padding: 0;
+      margin: 0;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    section {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    sm {
+      font-size: smaller;
+    }
+
+    canvas {
+      background-color: #0f0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #game {
+      flex: 1;
+      background-color: #000;
+    }
+
+    #interface {
+      flex: 1;
+      background-color: #fff;
+    }
+
+    #player-data-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #player-class-container {
+      text-align: center;
+      background-color: #f0f;
+    }
+
+    #player-stats-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: #f00;
+    }
+
+    #player-stats-container * {
+      padding: 0.2em;
+    }
+
+    #player-equipment-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column nowrap;
+      justify-content: space-between;
+      background-color: #0f0;
+      overflow-x: scroll;
+      overflow-y: hidden;
+    }
+
+    #player-inventory-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column nowrap;
+      justify-content: space-between;
+      background-color: #0f0;
+      overflow-x: scroll;
+      overflow-y: hidden;
+    }
+
+    #player-inventory-container div {
+      margin: 1em;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #0f0;
+    }
+
+    .item-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #eee;
+      border: 1px solid #000;
+    }
+
+    .equipment-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #0f0;
+      border: 1px solid #000;
+    }
+
+    #player-actions-container {
+      flex: 1;
+      background-color: #00f;
+    }
+
+    #game-data-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #game-actions-container {
+      flex: 1;
+      background-color: #ff0;
+    }
+    
+  </style>
+  <title>Gnomes</title>
+</head>
+<body>
+  <main>
+    <section id="game"></section>
+    <!-- <section id="interface">
+      <div id="player-data-container">
+        <div id="player-class-container">
+        </div>
+        <div id="player-stats-container">
+        </div>
+        <div id="player-equipment-container">
+        </div>
+        <div id="player-inventory-container">
+        </div>
+        <div id="player-actions-container">
+          <h4>Actions</h4>
+        </div>
+      </div>
+      <div id="game-data-container">
+      </div>
+    </section> -->
+  </main>
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <script type="module" src="./gnomes.js"></script>
+</body>
+</html>
