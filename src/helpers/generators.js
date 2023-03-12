@@ -1,6 +1,7 @@
 import { getRandomIntBetween, chooseRandomItem, chooseRandomEnemy } from './index.js';
 import { ARMOR, WEAPON, THING } from '../constants/index.js';
 import { locations } from '../content/locations.js';
+import { names } from '../content/names.js';
 
 export function generateWeaponData(initialWeaponData = chooseRandomItem(WEAPON)) {
   const { 
@@ -92,4 +93,13 @@ export function generateLocationData(initialLocationData) {
   return {
     ...initialLocationData
   }
+}
+
+export function generateHexColor() {
+  return '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+}
+
+export function generateName() {
+  const { firstNames, lastNames } = names.en.gnome
+  return `${firstNames[getRandomIntBetween(0, firstNames.length - 1)]} ${lastNames[getRandomIntBetween(0, lastNames.length - 1)]}`
 }

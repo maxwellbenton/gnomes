@@ -1,3 +1,5 @@
+import { generateHexColor } from '../helpers/generators'
+
 const itemActions = {
   attack: 'attack',
   defend: 'defend',
@@ -72,8 +74,8 @@ export const itemDefaults = {
 }
 
 export const defaultPlayerData = {
-  name: 'Player',
-  color: '#000000',
+  name: generateName(),
+  color: generateHexColor(),
 }
 
 export const defaultPlayerPosition = {
