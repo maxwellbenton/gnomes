@@ -5,7 +5,6 @@ class Enemy {
     const enemyData = generateEnemyData(initialEnemyData)
 
     Object.keys(enemyData).forEach(key => {
-      console.log(key, enemyData[key])
       this[key] = enemyData[key]
     })
   }

@@ -1,3 +1,5 @@
+import weapons from '../content/weapons.js'
+
 export default class CanvasHandler {
   constructor(game, player, location, p2pHandler) {
     this.game = game
@@ -108,10 +110,20 @@ export default class CanvasHandler {
     )
   }
 
+  drawWeapon({ weapon, context, target, center }) {
+    weapon.draw({ weapon, context, target, center })
+  }
+
   drawWeapons() {
     Object.keys(this.player.equipped.weapons).forEach(type => {
       if (!this.player.equipped.weapons[type]) return
-      this.player.equipped.weapons[type].draw(this.ctx, this.player, type, {x: this.canvas.width / 2, y: this.canvas.height / 2})
+      const weapon = this.player.equipped.weapons[type]
+      this.drawWeapon({
+        weapon, 
+        context: this.ctx, 
+        target: this.player, 
+        center: {x: this.canvas.width / 2, y: this.canvas.height / 2}
+      })
     })
   }
 
@@ -126,7 +138,11 @@ export default class CanvasHandler {
   drawPeers() {
     if (!this.p2pHandler.peerList.length) return
     this.p2pHandler.peerList.forEach(peerId => {
-      if (!this.player.acquaintances[peerId]) return
+      if (!this.player.acquaintances[peerId] 
+        || this.player.acquaintances[peerId].connecting
+        || !this.player.acquaintances[peerId].connection
+      ) return
+
       // console.log('drawing peer', this.player.acquaintances[peerId])
       
       const peer = this.player.acquaintances[peerId]
@@ -153,6 +169,21 @@ export default class CanvasHandler {
           10,
           'white'
         )
+      }
+      
+      if (peer.weapon) {
+        if (!weapons[peer.weapon.name]) {
+          console.warn('Peer has weapon that does not exist', peer.weapon.name)
+          return
+        }
+        
+        peer.weapon.draw = weapons[peer.weapon.name].draw
+        this.drawWeapon({ 
+          weapon: peer.weapon, 
+          context: this.ctx, 
+          target: peer, 
+          center: { x: this.offsetX + peer.position.x + this.playerWidth, y: this.offsetY + peer.position.y + this.playerHeight } 
+        })
       }
     })
   }

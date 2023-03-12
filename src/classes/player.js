@@ -1,5 +1,5 @@
 import { defaultPlayerData, defaultPlayerPosition } from '../constants/index.js';
-import { generateStats } from '../helpers/index.js';
+import { generateStats, generateName } from '../helpers/generators.js';
 import { InventoryHandler } from './inventoryHandler.js';
 import EquipmentHandler from './equipmentHandler.js';
 
@@ -16,6 +16,8 @@ export default class Player {
     this.friends = {}
     this.acquaintances = {}
     this.p2pHandler = null
+
+    this.data.name = generateName()
   }
 
   get totalWeight() {

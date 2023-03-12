@@ -102,7 +102,7 @@ class P2PHandler {
             topic: 'general',
             payload: {
               position: this.player.position,
-              class: this.player.class,
+              className: this.player.className,
               weapon,
               data: this.player.data,
               stats: this.player.stats

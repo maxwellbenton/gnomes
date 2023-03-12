@@ -1,4 +1,4 @@
-import { generateHexColor } from '../helpers/generators'
+import { generateHexColor, generateName } from '../helpers/generators.js'
 
 const itemActions = {
   attack: 'attack',
@@ -74,7 +74,7 @@ export const itemDefaults = {
 }
 
 export const defaultPlayerData = {
-  name: generateName(),
+  name: 'Player ' + Math.floor(Math.random()*1000),
   color: generateHexColor(),
 }
 

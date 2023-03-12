@@ -15,35 +15,6 @@ export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function generateStats() {
-  const strength = getRandomIntBetween(1,10)
-  const dexterity = getRandomIntBetween(1,10)
-  const constitution = getRandomIntBetween(1,10)
-  const intelligence = getRandomIntBetween(1,10)
-  const wisdom = getRandomIntBetween(1,10)
-  const charisma = getRandomIntBetween(1,10)
-  
-  const health = (constitution * 10) + (strength * 5)
-  const mana = (intelligence * 10) + (wisdom * 5)
-  const stamina = (dexterity * 10) + (strength * 5)
-  const carryWeight = (strength * 10) + (dexterity * 5)
-  const speed = ((dexterity * 10) + (strength * 5)) / 25
-
-  return {
-    strength,
-    dexterity,
-    constitution,
-    intelligence,
-    wisdom,
-    charisma,
-    health,
-    mana,
-    stamina,
-    carryWeight,
-    speed
-  }
-}
-
 export function chooseRandomArmor() {
   const armorIds = Object.keys(stuff.armor)
   const armorId = armorIds[Math.floor(Math.random() * armorIds.length)]

@@ -33,35 +33,21 @@ class PlayerPeer {
   }
 
   updateData({ className, stats, weapon, data }) {
+    // console.warn('updateData', { className, stats, weapon, data })
     this.className = className
     this.stats = stats
     this.weapon = weapon
     this.name = data.name
     this.color = data.color
+    // console.warn(this.className, this.stats, this,weapon)
   }
 
   sendData(data) {
     this.connection.send(data)
   }
 
-  // sendInitialData() {
-  //   this.sendData({
-  //     type: 'data',
-  //     topic: 'initialData',
-  //     payload: {
-  //       stats: { ...this.player.stats},
-  //       // inventory: { ...this.player.inventory},
-  //       // equipped: { ...this.player.equipped},
-  //       status: this.player.status,
-  //       class: this.player.class
-  //     }
-  //   })
-  // }
-
   updateConnectionToPeer(connection) {
     this.connection = connection
-
-    // this.sendInitialData()
 
     // on data received
     connection.on('data', ({ type, topic, payload }) => {
@@ -73,34 +59,6 @@ class PlayerPeer {
         this.updateData(payload)
         this.updatePosition(payload.position)
       }
-
-      // if (topic === 'initialData') {
-      //   this.stats = payload.stats
-      //   // this.inventory = payload.inventory
-      //   // this.equipped = payload.equipped
-      //   this.status = payload.status
-      //   this.class = payload.class
-      // }
-
-      // if (topic === 'stats') {
-      //   this.stats = payload
-      // }
-
-      // if (topic === 'inventory') {
-      //   this.inventory = payload
-      // }
-
-      // if (topic === 'equipped') {
-      //   this.equipped = payload
-      // }
-
-      // if (topic === 'location') {
-      //   this.location = payload
-      // }
-
-      // if (topic === 'status') {
-      //   this.status = payload
-      // }cc 
     });
   }
 
