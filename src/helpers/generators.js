@@ -1,5 +1,5 @@
 import { getRandomIntBetween, chooseRandomItem, chooseRandomEnemy } from './index.js';
-import { ARMOR, WEAPON, THING } from '../constants/index.js';
+import { ARMOR, WEAPON, FOOD } from '../constants/index.js';
 import { locations } from '../content/locations.js';
 import { names } from '../content/names.js';
 
@@ -45,20 +45,17 @@ export function generateArmorData(initialArmorData = chooseRandomItem(ARMOR)) {
   }
 }
 
-export function generateItemData(initialItemData = chooseRandomItem(THING)) {
+export function generatePickupData(initialItemData) {
+  const pickup = { ...chooseRandomItem(FOOD), ...initialItemData }
   const {
-    type,
-    name,
-    description,
     minHealthPoints,
-    maxHealthPoints
-  } = initialItemData
+    maxHealthPoints,
+    ...pickupProperties
+  } = pickup
 
   return {
-    type,
-    name,
-    description,
-    healthPoints: getRandomIntBetween(minHealthPoints, maxHealthPoints)
+    healthPoints: getRandomIntBetween(minHealthPoints, maxHealthPoints),
+    ...pickupProperties
   }
 }
 

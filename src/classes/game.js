@@ -1,6 +1,6 @@
 // import Player from './src/classes/player.js';
 import { locations } from '../content/locations.js';
-import Enemy from './enemy.js';
+import Pickup from './pickup.js';
 import Location from './location.js';
 import P2PHandler from '../p2p/index.js'
 import * as playerClasses from './player-classes.js'
@@ -17,6 +17,8 @@ export default class Game {
     
     this.items = {}
     this.enemies = {}
+    this.pickups = {}
+    this.pickupCount = 0
     this.enemyCount = 0
     this.enemyMode = 'aggressive'
 
@@ -24,22 +26,24 @@ export default class Game {
     
     this.canvasHandler = new CanvasHandler(this, this.player, this.location, this.p2pHandler)  
 
-    // setInterval(() => {
-    //   const x = Math.floor(Math.random() * this.location.width)
-    //   const y = Math.floor(Math.random() * this.location.height)
-    //   this.addItem(new Enemy({ x, y }))
-    // })
-
     setInterval(() => {
-      if (
-        this.enemyMode !== 'peaceful'
-        && this.enemyCount < this.location.levels[this.location.level].enemyLimit
-      ) {
+      if (this.pickupCount < 100) {
         const x = Math.floor(Math.random() * this.location.width)
         const y = Math.floor(Math.random() * this.location.height)
-        this.addEnemy(new Enemy({ x, y }))
+        this.addPickup(new Pickup({ x, y }))
       }
-    }, this.location.levels[this.location.level].spawnRate)
+    }, 2000)
+
+    // setInterval(() => {
+    //   if (
+    //     this.enemyMode !== 'peaceful'
+    //     && this.enemyCount < this.location.levels[this.location.level].enemyLimit
+    //   ) {
+    //     const x = Math.floor(Math.random() * this.location.width)
+    //     const y = Math.floor(Math.random() * this.location.height)
+    //     this.addEnemy(new Enemy({ x, y }))
+    //   }
+    // }, this.location.levels[this.location.level].spawnRate)
 
     console.log(this.enemies)
     console.log('location', this.location)
@@ -94,5 +98,22 @@ export default class Game {
     this.enemies[enemy.name] = this.enemies[enemy.name].filter(i => i.id !== enemy.id)
 
     this.enemyCount -= 1
+  }
+
+  addPickup(pickup) {
+    if (!this.pickups[pickup.name]) {
+      this.pickups[pickup.name] = []
+    }
+    this.pickups[pickup.name].push(pickup)
+    this.pickupCount += 1
+  }
+
+  removePickup(pickup) {
+    if (!this.pickups[pickup.name]) {
+      return
+    }
+
+    this.pickups[pickup.name] = this.pickups[pickup.name].filter(i => i.id !== pickup.id)
+    this.pickupCount -= 1
   }
 }

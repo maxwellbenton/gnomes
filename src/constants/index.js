@@ -35,7 +35,7 @@ const weaponItemDefaults = {
 
 export const ARMOR = 'armor'
 export const WEAPON = 'weapon'
-export const THING = 'thing'
+export const FOOD = 'food'
 
 // export const conditions = {
 //   poor: 0.25,

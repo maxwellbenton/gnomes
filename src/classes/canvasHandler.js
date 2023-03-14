@@ -1,4 +1,5 @@
 import weapons from '../content/weapons.js'
+import foods from '../content/foods.js'
 import { weaponRotationRate } from '../constants/index.js'
 
 async function loadImage(filePath) {
@@ -93,7 +94,8 @@ export default class CanvasHandler {
     this.backgroundImage = null
     this.playerImage = null
     this.weaponImage = null
-
+    this.images = {}
+    this.imagesLoaded = false
     this.getImages()
     
 
@@ -122,6 +124,13 @@ export default class CanvasHandler {
     this.backgroundImage = await loadImage(this.location.backgroundUrl)
     this.playerImage = await loadImage(this.player.imageUrl)
     this.weaponImage = await loadImage(this.player.equipped.weapons.primary.imageUrl)
+    
+    this.images.foods = {}
+    await Promise.all(Object.keys(foods).map(async (food) => {
+      this.images.foods[food] = await loadImage(foods[food].imageUrl) 
+    }))
+
+    this.imagesLoaded = true
   }
 
   drawRect(x, y, width, height, color) {
@@ -291,19 +300,18 @@ export default class CanvasHandler {
     )
   }
 
-  drawEnemies() {
-    Object.keys(this.game.enemies).forEach(enemyName => {
-      const enemyGroup = this.game.enemies[enemyName]
-      enemyGroup.forEach(enemy => {
-        this.drawRect(
-          this.offsetX + enemy.x, 
-          this.offsetY + enemy.y, 
-          16, 
-          16, 
-          'red'
-        )
+  drawPickups() {
+    if (this.imagesLoaded) {
+      Object.keys(this.game.pickups).forEach(pickupType => {
+        this.game.pickups[pickupType].forEach(pickup => {
+          this.ctx.drawImage(
+            this.images.foods[pickup.name], 
+            this.offsetX + pickup.x, 
+            this.offsetY + pickup.y
+          )
+        })
       })
-    })
+    }
   }
 
   drawWeapon({ weapon, context, target, center }) {
@@ -468,32 +476,45 @@ export default class CanvasHandler {
 
     this.offsetX = this.centerX - this.player.position.x
     this.offsetY = this.centerY - this.player.position.y
+
+    this.hitDetection()
   }
 
-  enemyHitDetection() {
-    Object.keys(this.game.enemies).forEach(enemyId => {
-      this.game.enemies[enemyId].forEach(enemy => {
-        
+  pickupHitDetection() {
+    Object.keys(this.game.pickups).forEach(pickupId => {
+      this.game.pickups[pickupId].forEach(pickup => {
+        const pickupX = this.offsetX + pickup.x
+        const pickupY = this.offsetY + pickup.y
+        const playerX = this.offsetX + this.player.position.x
+        const playerY = this.offsetY + this.player.position.y
+        if (playerX > pickupX - 100 && playerX < pickupX + 100 && playerY > pickupY - 100 && playerY < pickupY + 100) {
+          pickup.x += (playerX - pickupX) > 0 ? 5 : -5
+          pickup.y += (playerY - pickupY) > 0 ? 5 : -5
+        }
+
+        if (playerX > pickupX - 16 && playerX < pickupX + 16 && playerY > pickupY - 16 && playerY < pickupY + 16) {
+          this.game.pickups[pickupId].splice(this.game.pickups[pickupId].indexOf(pickup), 1)
+          this.player.inventory.items.push(pickup)
+        }
       })
     })
   }
 
   hitDetection() {
-    this.enemyHitDetection()
+    this.pickupHitDetection()
   //   this.playerHitDetection()
   //   this.peerHitDetection()
   }
 
   gameLoop() {
     this.update();
-    this.hitDetection()
     // console.log(this.game.items)
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.drawBackground();
     this.drawLocation();
-    this.drawEnemies();
+    this.drawPickups();
     this.drawPlayer();
     this.drawPeers();
     this.drawWeapons();

@@ -1,6 +1,6 @@
 import stuff from '../content/index.js';
 import { enemies } from '../content/enemies.js';
-import { ARMOR, WEAPON, THING } from '../constants/index.js';
+import { ARMOR, WEAPON, FOOD } from '../constants/index.js';
 
 export function checkParamsFor(param) {
   let params = new URLSearchParams(window.location.search);
@@ -27,10 +27,10 @@ export function chooseRandomWeapon() {
   return stuff.weapons[weaponId]
 }
 
-export function chooseRandomThing() {
-  const thingIds = Object.keys(stuff.things)
-  const thingId = thingIds[Math.floor(Math.random() * thingIds.length)]
-  return stuff.things[thingId]
+export function chooseRandomFood() {
+  const foodIds = Object.keys(stuff.foods)
+  const foodId = foodIds[Math.floor(Math.random() * foodIds.length)]
+  return stuff.foods[foodId]
 }
 
 export function chooseRandomItem(itemType) {
@@ -39,11 +39,11 @@ export function chooseRandomItem(itemType) {
       return chooseRandomArmor()
     case WEAPON:
       return chooseRandomWeapon()
-    case THING:
-      return chooseRandomThing()
+    case FOOD:
+      return chooseRandomFood()
     default:
       console.error('Invalid item type!', itemType)
-      return chooseRandomThing()
+      return chooseRandomFood()
   }
 }
 

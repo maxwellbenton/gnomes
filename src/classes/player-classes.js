@@ -25,17 +25,17 @@ const clothPants = new Armor(stuff.armor.clothPants);
 
 const leatherCloak = new Armor(stuff.armor.leatherCloak);
 
-const oyster = new Item(stuff.things.oyster);
-const shiitake = new Item(stuff.things.shiitake);
-const acorn = new Item(stuff.things.acorn);
-const chickenOfTheWoods = new Item(stuff.things.chickenOfTheWoods);
-const chanterelle = new Item(stuff.things.chanterelle);
-const morel = new Item(stuff.things.morel);
+const oyster = new Item(stuff.foods.oyster);
+const shiitake = new Item(stuff.foods.shiitake);
+const acorn = new Item(stuff.foods.acorn);
+const chickenOfTheWoods = new Item(stuff.foods.chickenOfTheWoods);
+const chanterelle = new Item(stuff.foods.chanterelle);
+const morel = new Item(stuff.foods.morel);
 
-const rock = new Item(stuff.things.rock);
-const stick = new Item(stuff.things.stick);
-const branch = new Item(stuff.things.branch);
-const log = new Item(stuff.things.log);
+const rock = new Item(stuff.foods.rock);
+const stick = new Item(stuff.foods.stick);
+const branch = new Item(stuff.foods.branch);
+const log = new Item(stuff.foods.log);
 
 export class FighterGnome extends Player {
   constructor() {

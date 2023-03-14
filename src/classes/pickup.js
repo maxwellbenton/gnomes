@@ -1,20 +1,13 @@
-import { generateItemData } from '../helpers/generators.js';
+import { generatePickupData } from '../helpers/generators.js';
 
 class Pickup {
-  constructor(initialItemData) {
-    const {
-      type,
-      name,
-      description,
-      weight,
-      healthPoints
-    } = generateItemData(initialItemData)
+  constructor(initialPickupData) {
     this.id = Math.floor(Math.random() * 1000000)
-    this.type = type;
-    this.name = name;
-    this.description = description;
-    this.weight = weight;
-    this.healthPoints = healthPoints;
+
+    const pickupData = generatePickupData(initialPickupData)
+    Object.keys(pickupData).forEach(key => {
+      this[key] = pickupData[key]
+    })
   }
 }
 
