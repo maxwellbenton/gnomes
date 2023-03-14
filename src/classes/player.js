@@ -16,7 +16,7 @@ export default class Player {
     this.friends = {}
     this.acquaintances = {}
     this.p2pHandler = null
-
+    this.imageUrl = './src/assets/images/characters/character.png'
     this.data.name = generateName()
   }
 

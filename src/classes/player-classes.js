@@ -1,6 +1,6 @@
 import Player from './player.js';
 import stuff from '../content/index.js';
-import Item from './item.js';
+import Item from './pickup.js';
 import Weapon from './weapon.js';
 import Armor from './armor.js';
 

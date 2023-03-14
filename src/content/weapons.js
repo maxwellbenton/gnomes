@@ -128,9 +128,10 @@ const weapons = {
     maxWeight: 6,
     minSpeed: 8,
     maxSpeed: 13,
-    length: 30,
+    length: 20,
     width: 3,
     color: '#555555',
+    imageUrl: './src/assets/images/weapons/sword.png',
     draw: ({ weapon, context, target, center }) => {
       const offsets = calculatePointData(weapon, target.position, center)
       
@@ -147,9 +148,10 @@ const weapons = {
     maxWeight: 7,
     minSpeed: 5,
     maxSpeed: 10,
-    length: 35,
+    length: 20,
     width: 3,
     color: '#555555',
+    imageUrl: './src/assets/images/weapons/axe.png',
     draw: ({ weapon, context, target, center }) => {
       const offsets = calculatePointData(weapon, target.position, center)
       
@@ -188,6 +190,7 @@ const weapons = {
     length: 35,
     width: 3,
     color: '#555555',
+    imageUrl: './src/assets/images/weapons/greatsword.png',
     draw: ({ weapon, context, target, center }) => {
       const offsets = calculatePointData(weapon, target.position, center)
       
@@ -397,6 +400,7 @@ const weapons = {
     length: 45,
     width: 3,
     color: '#555555',
+    imageUrl: './src/assets/images/weapons/greatsword.png',
     draw: ({ weapon, context, target, center }) => {
       const offsets = calculatePointData(weapon, target.position, center)
       

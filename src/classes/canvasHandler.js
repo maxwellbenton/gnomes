@@ -1,4 +1,17 @@
 import weapons from '../content/weapons.js'
+import { weaponRotationRate } from '../constants/index.js'
+
+async function loadImage(filePath) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = function () {
+      resolve(img)
+    };
+  
+    img.src = filePath;
+  })
+}
 
 function turnClockwise(alpha, beta) {
   const delta = 360 - alpha
@@ -32,8 +45,6 @@ export default class CanvasHandler {
     this.canvas = document.createElement('canvas');
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
-    this.offsetX = 0
-    this.offsetY = 0
 
     this.playerWidth = 16
     this.playerHeight = 16
@@ -45,7 +56,11 @@ export default class CanvasHandler {
     this.player.position.x = this.location.startingX
     this.player.position.y = this.location.startingY
 
+    this.offsetX = this.centerX - this.player.position.x
+    this.offsetY = this.centerY - this.player.position.y
+
     this.player.position.viewAngle = 0
+
 
     this.keysPressed = {}
     this.mouse = {
@@ -54,6 +69,7 @@ export default class CanvasHandler {
     }
 
     this.ctx = this.canvas.getContext('2d');
+
     document.querySelector('#game').innerHTML = ""
     document.querySelector('#game').appendChild(this.canvas)
 
@@ -64,6 +80,8 @@ export default class CanvasHandler {
       this.mouse.y = e.clientY
     })
 
+    
+    
     document.addEventListener('keydown', (event) => {
       this.keysPressed[event.key] = true;
     });
@@ -72,10 +90,38 @@ export default class CanvasHandler {
       this.keysPressed[event.key] = false;
     });
 
+    this.backgroundImage = null
+    this.playerImage = null
+    this.weaponImage = null
+
+    this.getImages()
+    
+
     this.backgroundColor = 'black'
     this.drawBackground()
 
     // this.gameLoop()
+  }
+
+  rotateAndCache(image, angle) {
+    var offscreenCanvas = document.createElement('canvas');
+    var offscreenCtx = offscreenCanvas.getContext('2d');
+  
+    var size = Math.max(image.width, image.height) * 2;
+    offscreenCanvas.width = size;
+    offscreenCanvas.height = size;
+  
+    offscreenCtx.translate(size/2, size/2);
+    offscreenCtx.rotate(angle + Math.PI/2);
+    offscreenCtx.drawImage(image, -(image.width/2), 0);
+  
+    return offscreenCanvas;
+  }
+
+  async getImages(...imagesToLoad) {
+    this.backgroundImage = await loadImage(this.location.backgroundUrl)
+    this.playerImage = await loadImage(this.player.imageUrl)
+    this.weaponImage = await loadImage(this.player.equipped.weapons.primary.imageUrl)
   }
 
   drawRect(x, y, width, height, color) {
@@ -98,22 +144,135 @@ export default class CanvasHandler {
   }
 
   drawLocation() {
-    // given a players position on a map, draw the map so that the player is in the middle
-    
-    this.offsetX = this.centerX - this.player.position.x
-    this.offsetY = this.centerY - this.player.position.y
-    // console.log('drawing location', offsetX, offsetY)
-    this.drawRect(this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
+    if (this.backgroundImage) {
+      this.ctx.drawImage(this.backgroundImage, this.offsetX, this.offsetY)
+    } else {
+      this.drawRect(this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
+    }
   }
 
   drawPlayer() {
-    this.drawRect(
-      (this.canvas.width / 2) - (this.playerWidth / 2), 
-      (this.canvas.height / 2) - (this.playerHeight / 2), 
-      this.playerWidth, 
-      this.playerHeight, 
-      this.player.data.color
-    )
+    if (this.playerImage) {
+      switch (true) {
+        case (this.player.position.viewAngle < -135):
+          // right
+          this.ctx.drawImage(
+            this.playerImage, 
+            80,
+            0,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            16,
+            30
+          )
+          break
+        case (this.player.position.viewAngle < -90):
+          // down/right
+          this.ctx.drawImage(
+            this.playerImage, 
+            48,
+            30,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+          break
+        case (this.player.position.viewAngle < -45):
+          // down/left
+          this.ctx.drawImage(
+            this.playerImage, 
+            48,
+            0,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+          break
+        case (this.player.position.viewAngle < 45):
+          // left
+          this.ctx.drawImage(
+            this.playerImage, 
+            80,
+            30,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+          break
+        case (this.player.position.viewAngle < 90):
+          // up/left
+          this.ctx.drawImage(
+            this.playerImage, 
+            64,
+            0,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+          break
+        case (this.player.position.viewAngle < 135):
+          // up/right
+          this.ctx.drawImage(
+            this.playerImage, 
+            64,
+            30,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+          break
+        case (this.player.position.viewAngle <= 180):
+          this.ctx.drawImage(
+            this.playerImage, 
+            80,
+            0,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            16,
+            30
+          )
+          break
+        default:
+          this.ctx.drawImage(
+            this.playerImage, 
+            48,
+            0,
+            16,
+            30,
+            this.centerX - (this.playerWidth / 2), 
+            this.centerY - (this.playerHeight / 2) - 14,
+            this.playerWidth,
+            this.playerHeight + 14
+          )
+      }
+    } else {
+      this.drawRect(
+        (this.canvas.width / 2) - (this.playerWidth / 2), 
+        (this.canvas.height / 2) - (this.playerHeight / 2), 
+        this.playerWidth, 
+        this.playerHeight, 
+        this.player.data.color
+      )
+    }
 
     this.drawText(
       this.player.data.name,
@@ -132,8 +291,27 @@ export default class CanvasHandler {
     )
   }
 
+  drawEnemies() {
+    Object.keys(this.game.enemies).forEach(enemyName => {
+      const enemyGroup = this.game.enemies[enemyName]
+      enemyGroup.forEach(enemy => {
+        this.drawRect(
+          this.offsetX + enemy.x, 
+          this.offsetY + enemy.y, 
+          16, 
+          16, 
+          'red'
+        )
+      })
+    })
+  }
+
   drawWeapon({ weapon, context, target, center }) {
     weapon.draw({ weapon, context, target, center })
+    if (this.weaponImage) {
+      const rotatedWeapon = this.rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
+      context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
+    }
   }
 
   drawWeapons() {
@@ -220,7 +398,7 @@ export default class CanvasHandler {
 
         peer.position.viewAngle
         const actualAngle = peer.newPosition.viewAngle
-        const change = peer.stats.strength / peer.weapon.weight * 2
+        const change = peer.stats.strength / peer.weapon.weight * weaponRotationRate
 
         if (Math.abs(peer.position.viewAngle - actualAngle) < change || Math.abs(actualAngle - peer.position.viewAngle) < change) {
           peer.position.viewAngle = actualAngle
@@ -256,29 +434,25 @@ export default class CanvasHandler {
     const playerMouseXDiff = (this.canvas.width / 2) - this.mouse.x
     const playerMouseYDiff = (this.canvas.height / 2) - this.mouse.y
     const actualAngle = Math.atan2(playerMouseYDiff, playerMouseXDiff) * 180 / Math.PI
-    const change = this.player.stats.strength / this.player.equipped.weapons.primary.weight * 2
+    const change = this.player.stats.strength / this.player.equipped.weapons.primary.weight * weaponRotationRate
     
     turnWeapon(this.player, currentAngle, actualAngle, change)
 
     let xDiff = 0
     let yDiff = 0
     if (this.keysPressed['w'] || this.keysPressed['ArrowUp']) {
-      yDiff += 1 * this.player.stats.speed
       this.player.position.y -= 1 * this.player.stats.speed
       // this.player.position.movementDirection.y = -1
     }
     if (this.keysPressed['s'] || this.keysPressed['ArrowDown']) {
-      yDiff -= 1 * this.player.stats.speed
       this.player.position.y += 1 * this.player.stats.speed
       // this.player.position.movementDirection.y = 1
     }
     if (this.keysPressed['a'] || this.keysPressed['ArrowLeft']) {
-      xDiff += 1 * this.player.stats.speed
       this.player.position.x -= 1 * this.player.stats.speed
       // this.player.position.movementDirection.x = -1
     }
     if (this.keysPressed['d'] || this.keysPressed['ArrowRight']) {
-      xDiff -= 1 * this.player.stats.speed
       this.player.position.x += 1 * this.player.stats.speed
       // this.player.position.movementDirection.x = 1
     }
@@ -292,26 +466,37 @@ export default class CanvasHandler {
       const peer = this.p2pHandler.peerList[peerId]
     })
 
-    // Object.keys(this.game.items).forEach(itemName => {
-    //   this.game.items[itemName].forEach(item => {
-    //     item.position.rx += xDiff
-    //     item.position.ry += yDiff
-    //   })
-    // })
+    this.offsetX = this.centerX - this.player.position.x
+    this.offsetY = this.centerY - this.player.position.y
+  }
+
+  enemyHitDetection() {
+    Object.keys(this.game.enemies).forEach(enemyId => {
+      this.game.enemies[enemyId].forEach(enemy => {
+        
+      })
+    })
+  }
+
+  hitDetection() {
+    this.enemyHitDetection()
+  //   this.playerHitDetection()
+  //   this.peerHitDetection()
   }
 
   gameLoop() {
     this.update();
+    this.hitDetection()
     // console.log(this.game.items)
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.drawBackground();
     this.drawLocation();
-    // this.drawItems();
-    this.drawWeapons();
+    this.drawEnemies();
     this.drawPlayer();
     this.drawPeers();
+    this.drawWeapons();
     window.requestAnimationFrame(this.gameLoop.bind(this));
   }
 }

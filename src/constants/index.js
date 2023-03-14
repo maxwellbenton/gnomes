@@ -104,3 +104,5 @@ export const defaultArmor = {
   cloak: null,
   shield: null,
 }
+
+export const weaponRotationRate = 9 // 18 === strength 10 at 1 pound can move 180 degrees

@@ -17,11 +17,30 @@ export default class Game {
     
     this.items = {}
     this.enemies = {}
+    this.enemyCount = 0
+    this.enemyMode = 'aggressive'
+
     this.location = new Location(locations.debugArena, this.player)
     
     this.canvasHandler = new CanvasHandler(this, this.player, this.location, this.p2pHandler)  
 
-    this.addEnemy(new Enemy({ x: 100, y: 100 }))
+    // setInterval(() => {
+    //   const x = Math.floor(Math.random() * this.location.width)
+    //   const y = Math.floor(Math.random() * this.location.height)
+    //   this.addItem(new Enemy({ x, y }))
+    // })
+
+    setInterval(() => {
+      if (
+        this.enemyMode !== 'peaceful'
+        && this.enemyCount < this.location.levels[this.location.level].enemyLimit
+      ) {
+        const x = Math.floor(Math.random() * this.location.width)
+        const y = Math.floor(Math.random() * this.location.height)
+        this.addEnemy(new Enemy({ x, y }))
+      }
+    }, this.location.levels[this.location.level].spawnRate)
+
     console.log(this.enemies)
     console.log('location', this.location)
     console.log(this.player.constructor.name.replace('Gnome', ''))
@@ -64,6 +83,7 @@ export default class Game {
       this.enemies[enemy.name] = []
     }
     this.enemies[enemy.name].push(enemy)
+    this.enemyCount += 1
   }
 
   removeEnemy(enemy) {
@@ -72,5 +92,7 @@ export default class Game {
     }
 
     this.enemies[enemy.name] = this.enemies[enemy.name].filter(i => i.id !== enemy.id)
+
+    this.enemyCount -= 1
   }
 }

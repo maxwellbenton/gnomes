@@ -5,33 +5,20 @@ import { names } from '../content/names.js';
 
 export function generateWeaponData(initialWeaponData = chooseRandomItem(WEAPON)) {
   const { 
-    type,
-    name,
-    description,
     minDamage,
     maxDamage,
     minWeight,
     maxWeight,
     minSpeed,
     maxSpeed,
-    length,
-    color,
-    width,
-    draw
   } = initialWeaponData
   
   return {
-    type,
-    name,
-    description,
     damage: getRandomIntBetween(minDamage, maxDamage),
     speed: getRandomIntBetween(minSpeed, maxSpeed),
     weight: getRandomIntBetween(minWeight, maxWeight),
     condition: 'new',
-    length,
-    color,
-    width,
-    draw
+    ...initialWeaponData
   }
 }
 
@@ -82,7 +69,6 @@ export function generateEnemyData(initialEnemyData) {
       ...chooseRandomEnemy()
     }
   }
-  console.log('1', initialEnemyData)
 
   return {
     ...initialEnemyData
