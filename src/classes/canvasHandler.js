@@ -1,6 +1,14 @@
 import weapons from '../content/weapons.js'
 import foods from '../content/foods.js'
+import environmentObjects from '../content/environment-objects.js'
 import { weaponRotationRate } from '../constants/index.js'
+import Pickup from './pickup.js'
+
+function safeDo(fn, ...args) {
+  try {
+    return fn(...args)
+  } catch (e) { console.error('GNOMETHING HAS WRONGED', e)}
+}
 
 async function loadImage(filePath) {
   return new Promise((resolve, reject) => {
@@ -120,16 +128,26 @@ export default class CanvasHandler {
     return offscreenCanvas;
   }
 
+  
+
   async getImages(...imagesToLoad) {
-    this.backgroundImage = await loadImage(this.location.backgroundUrl)
-    this.playerImage = await loadImage(this.player.imageUrl)
+    this.backgroundImage = await safeDo(loadImage, this.location.backgroundUrl)
+    this.playerImage = await safeDo(loadImage, this.player.imageUrl)
     this.weaponImage = await loadImage(this.player.equipped.weapons.primary.imageUrl)
     
     this.images.foods = {}
-    await Promise.all(Object.keys(foods).map(async (food) => {
-      this.images.foods[food] = await loadImage(foods[food].imageUrl) 
-    }))
+    this.images.envObjects = {}
 
+    await Promise.all([].concat(
+      Object.keys(foods).map(async (food) => {
+        this.images.foods[food] = await loadImage(foods[food].imageUrl)
+        return this.images.foods[food]
+      }),
+      Object.keys(environmentObjects).map(async (envObject) => {
+        this.images.envObjects[envObject] = await loadImage(environmentObjects[envObject].imageUrl) 
+        return this.images.envObjects[envObject]
+      })
+    ))
     this.imagesLoaded = true
   }
 
@@ -300,6 +318,24 @@ export default class CanvasHandler {
     )
   }
 
+  drawEnvObjects() {
+    if (this.imagesLoaded) {
+      // console.warn('1')
+      Object.keys(this.game.envObjects).forEach(envObjectType => {
+        // console.warn('2', this.game.envObjects, envObjectType)
+        this.game.envObjects[envObjectType].forEach(envObject => {
+          try {
+            this.ctx.drawImage(
+              this.images.envObjects[envObject.name], 
+              this.offsetX + envObject.x, 
+              this.offsetY + envObject.y
+            )
+          } catch (e) { console.error(e) }
+        })
+      })
+    }
+  }
+
   drawPickups() {
     if (this.imagesLoaded) {
       Object.keys(this.game.pickups).forEach(pickupType => {
@@ -315,23 +351,25 @@ export default class CanvasHandler {
   }
 
   drawWeapon({ weapon, context, target, center }) {
-    weapon.draw({ weapon, context, target, center })
-    if (this.weaponImage) {
-      const rotatedWeapon = this.rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
-      context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
-    }
+    // draw backup canvas shape
+    weapon.offsets = weapon.getHitboxPoints({ weapon, context, target, center })
+    weapon.draw({ weapon, context, offsets: weapon.offsets })
+
+    // draw image
+    // if (this.weaponImage) {
+    //   const rotatedWeapon = this.rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
+    //   context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
+    // }
   }
 
   drawWeapons() {
-    Object.keys(this.player.equipped.weapons).forEach(type => {
-      if (!this.player.equipped.weapons[type]) return
-      const weapon = this.player.equipped.weapons[type]
-      this.drawWeapon({
-        weapon, 
-        context: this.ctx, 
-        target: this.player, 
-        center: {x: this.canvas.width / 2, y: this.canvas.height / 2}
-      })
+    if (!this.player.equipped.weapons.primary) return
+    const weapon = this.player.equipped.weapons.primary
+    this.drawWeapon({
+      weapon, 
+      context: this.ctx, 
+      target: this.player, 
+      center: { x: this.canvas.width / 2, y: this.canvas.height / 2 }
     })
   }
 
@@ -500,8 +538,49 @@ export default class CanvasHandler {
     })
   }
 
+  weaponHitDetection() {
+    Object.keys(this.game.envObjects).forEach(envObjectsId => {
+      this.game.envObjects[envObjectsId].forEach(envObject => {
+        if (!this.player.equipped.weapons.primary.offsets) return
+        const envObjectX = envObject.x
+        const envObjectY = envObject.y
+        const playerX = this.player.position.x
+        const playerY = this.player.position.y
+        if (playerX > envObjectX - 30 && playerX < envObjectX + 30 && playerY > envObjectY - 30 && playerY < envObjectY + 30) {
+          // console.warn(envObject)
+          const offsets = this.player.equipped.weapons.primary.offsets
+          // console.warn(envObjectX, envObject  , this.player.equipped.weapons.primary.offsets)
+
+          Object.keys(offsets).forEach(offsetType => {
+            Object.keys(offsets[offsetType]).forEach(point => {
+              const offsetPointX = this.centerX - offsets[offsetType][point].tx + this.player.position.x
+              const offsetPointY = this.centerY - offsets[offsetType][point].ty + this.player.position.y
+              if (
+                offsetPointX > envObjectX 
+                && offsetPointX < envObjectX + 16 
+                && offsetPointY > envObjectY 
+                && offsetPointY < envObjectY + 30
+              ) {
+                this.game.addPickup(new Pickup({ x: envObject.x, y: envObject.y }))
+                this.game.envObjects[envObjectsId] = this.game.envObjects[envObjectsId].filter(obj => obj.id !== envObject.id)
+              }
+            })
+          })
+
+
+        }
+
+        // if (playerX > envObjectsX - 16 && playerX < envObjectsX + 16 && playerY > envObjectsY - 16 && playerY < envObjectsY + 16) {
+        //   this.game.envObjects[envObjectsId].splice(this.game.envObjects[envObjectsId].indexOf(envObjects), 1)
+        //   this.player.inventory.items.push(envObjects)
+        // }
+      })
+    })
+  }
+
   hitDetection() {
     this.pickupHitDetection()
+    this.weaponHitDetection()
   //   this.playerHitDetection()
   //   this.peerHitDetection()
   }
@@ -514,6 +593,7 @@ export default class CanvasHandler {
 
     this.drawBackground();
     this.drawLocation();
+    this.drawEnvObjects();
     this.drawPickups();
     this.drawPlayer();
     this.drawPeers();

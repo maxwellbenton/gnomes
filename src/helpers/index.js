@@ -1,5 +1,6 @@
 import stuff from '../content/index.js';
 import { enemies } from '../content/enemies.js';
+import environmentObjects from '../content/environment-objects.js';
 import { ARMOR, WEAPON, FOOD } from '../constants/index.js';
 
 export function checkParamsFor(param) {
@@ -51,4 +52,10 @@ export function chooseRandomEnemy() {
   const enemyIds = Object.keys(enemies)
   const enemyId = enemyIds[Math.floor(Math.random() * enemyIds.length)]
   return enemies[enemyId]
+}
+
+export function chooseRandomEnvObj() {
+  const objectIds = Object.keys(environmentObjects)
+  const objectId = objectIds[Math.floor(Math.random() * objectIds.length)]
+  return environmentObjects[objectId]
 }

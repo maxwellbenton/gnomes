@@ -1,4 +1,9 @@
-import { getRandomIntBetween, chooseRandomItem, chooseRandomEnemy } from './index.js';
+import { 
+  chooseRandomEnemy,
+  chooseRandomEnvObj, 
+  chooseRandomItem, 
+  getRandomIntBetween
+} from './index.js';
 import { ARMOR, WEAPON, FOOD } from '../constants/index.js';
 import { locations } from '../content/locations.js';
 import { names } from '../content/names.js';
@@ -56,6 +61,20 @@ export function generatePickupData(initialItemData) {
   return {
     healthPoints: getRandomIntBetween(minHealthPoints, maxHealthPoints),
     ...pickupProperties
+  }
+}
+
+export function generateEnvObjectData(initialEnvObjData) {
+  const envObj = { ...chooseRandomEnvObj(FOOD), ...initialEnvObjData }
+  const {
+    minHealthPoints,
+    maxHealthPoints,
+    ...envObjProperties
+  } = envObj
+
+  return {
+    healthPoints: getRandomIntBetween(minHealthPoints, maxHealthPoints),
+    ...envObjProperties
   }
 }
 

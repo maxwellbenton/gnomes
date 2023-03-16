@@ -1,5 +1,19 @@
-function drawLine({ context, weapon: { width, color }, offsets: { start, end } }) {
-  // console.log('drawLine', { width, color }, { start, end })
+function reassignExtremeAngles(angle) {
+  if (angle > -180 && angle <= 180) return angle
+  if (angle < -180) angle += 360
+  if (angle > 180) angle -= 360
+  return angle
+}
+
+function drawLine({ 
+  context, 
+  weapon: { 
+    width, 
+    color 
+  }, 
+  start,
+  end
+}) {
   context.lineWidth = width;
   context.beginPath();
   context.moveTo(start.x, start.y);
@@ -8,21 +22,15 @@ function drawLine({ context, weapon: { width, color }, offsets: { start, end } }
   context.stroke();
 }
 
-function calculatePointData(weapon, { viewAngle }, center) {
-  const cosOfAngle = Math.cos((viewAngle + 180) * Math.PI / 180)
-  const sinOfAngle = Math.sin((viewAngle + 180) * Math.PI / 180)
-  const startOffset = weapon.length * weaponConstraints.start
-  const endOffset = weapon.length * weaponConstraints.end
+function calculatePointData(length, angle, center) {
+  const cos = (length * Math.cos((angle - 180) * Math.PI / 180))
+  const sin = (length * Math.sin((angle - 180) * Math.PI / 180))
 
   return {
-    start: {
-      x: center.x + (startOffset * cosOfAngle),
-      y: center.y + (startOffset * sinOfAngle)
-    },
-    end: {
-      x: center.x + (endOffset * cosOfAngle),
-      y: center.y + (endOffset * sinOfAngle)
-    }
+    x: center.x + cos,
+    y: center.y + sin,
+    tx: center.x - cos,
+    ty: center.y - sin
   }
 }
 
@@ -30,8 +38,34 @@ const weaponConstraints = {
   start: 0.4,
   end: 2
 }
+
 const defaults = {
   type: 'weapon',
+  name: 'WEAPON',
+  description: 'A default weapon.',
+  minDamage: 1,
+  maxDamage: 5,
+  minWeight: 1,
+  maxWeight: 5,
+  minSpeed: 1,
+  maxSpeed: 5,
+  length: 50,
+  width: 5,
+  color: 'grey',
+  imageUrl: './src/assets/images/weapons/greatsword.png',
+  draw: ({ weapon, context, offsets }) => {
+    drawLine({ weapon, context, start: offsets.centerOffsets.base, end: offsets.centerOffsets.tip })
+  },
+  getHitboxPoints: ({ weapon: { length }, target: { position: { viewAngle }}, center }) => {
+    return {
+      centerOffsets: {
+        base: calculatePointData(length * 0.1, viewAngle, center),
+        mid: calculatePointData(length / 2, viewAngle, center),
+        threeQuarters: calculatePointData(length * 0.75, viewAngle, center),
+        tip: calculatePointData(length, viewAngle, center),
+      }
+    }
+  }
 }
 
 const weapons = {
@@ -45,15 +79,9 @@ const weapons = {
     maxWeight: 3,
     minSpeed: 8,
     maxSpeed: 25,
-    length: 10,
     length: 35,
     width: 5,
-    color: 'green',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: 'green'
   },
   pickaxe: {
     ...defaults,
@@ -69,12 +97,7 @@ const weapons = {
     maxSpeed: 10,
     length: 25,
     width: 3,
-    color: '#bbbbff',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#bbbbff'
   },
   mace: {
     ...defaults,
@@ -90,12 +113,7 @@ const weapons = {
     maxSpeed: 18,
     length: 20,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   shortsword: {
     ...defaults,
@@ -111,12 +129,7 @@ const weapons = {
     maxSpeed: 18,
     length: 20,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   sword: {
     ...defaults,
@@ -130,13 +143,7 @@ const weapons = {
     maxSpeed: 13,
     length: 20,
     width: 3,
-    color: '#555555',
-    imageUrl: './src/assets/images/weapons/sword.png',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   longsword: {
     ...defaults,
@@ -150,13 +157,7 @@ const weapons = {
     maxSpeed: 10,
     length: 20,
     width: 3,
-    color: '#555555',
-    imageUrl: './src/assets/images/weapons/axe.png',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   dagger: {
     ...defaults,
@@ -170,12 +171,7 @@ const weapons = {
     maxSpeed: 20,
     length: 10,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   staff: {
     ...defaults,
@@ -189,13 +185,7 @@ const weapons = {
     maxSpeed: 9,
     length: 35,
     width: 3,
-    color: '#555555',
-    imageUrl: './src/assets/images/weapons/greatsword.png',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   bow: {
     ...defaults,
@@ -209,12 +199,7 @@ const weapons = {
     maxSpeed: 10,
     length: 1,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   crossbow: {
     ...defaults,
@@ -228,12 +213,7 @@ const weapons = {
     maxSpeed: 8,
     length: 0,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   sling: {
     ...defaults,
@@ -247,12 +227,7 @@ const weapons = {
     maxSpeed: 11,
     length: 0,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   axe: {
     ...defaults,
@@ -266,12 +241,7 @@ const weapons = {
     maxSpeed: 10,
     length: 25,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   hammer: {
     ...defaults,
@@ -285,12 +255,7 @@ const weapons = {
     maxSpeed: 9,
     length: 20,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   spear: {
     ...defaults,
@@ -304,12 +269,7 @@ const weapons = {
     maxSpeed: 8,
     length: 40,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   halberd: {
     ...defaults,
@@ -323,12 +283,7 @@ const weapons = {
     maxSpeed: 6,
     length: 45,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   flail: {
     ...defaults,
@@ -342,12 +297,7 @@ const weapons = {
     maxSpeed: 8,
     length: 35,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   scythe: {
     ...defaults,
@@ -361,12 +311,7 @@ const weapons = {
     maxSpeed: 5,
     length: 40,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   warhammer: {
     ...defaults,
@@ -380,12 +325,7 @@ const weapons = {
     maxSpeed: 5,
     length: 45,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   greatsword: {
     ...defaults,
@@ -399,13 +339,7 @@ const weapons = {
     maxSpeed: 5,
     length: 45,
     width: 3,
-    color: '#555555',
-    imageUrl: './src/assets/images/weapons/greatsword.png',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   greataxe: {
     ...defaults,
@@ -419,13 +353,7 @@ const weapons = {
     maxSpeed: 4,
     length: 45,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      console.error({weapon, context, target, center})
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   greatclub: {
     ...defaults,
@@ -439,12 +367,7 @@ const weapons = {
     maxSpeed: 4,
     length: 45,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   greatflail: {
     ...defaults,
@@ -458,12 +381,7 @@ const weapons = {
     maxSpeed: 4,
     length: 45,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   },
   glaive: {
     ...defaults,
@@ -477,12 +395,7 @@ const weapons = {
     maxSpeed: 4,
     length: 50,
     width: 3,
-    color: '#555555',
-    draw: ({ weapon, context, target, center }) => {
-      const offsets = calculatePointData(weapon, target.position, center)
-      
-      drawLine({ weapon, context, offsets })
-    }
+    color: '#555555'
   }
 }
 

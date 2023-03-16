@@ -1,6 +1,7 @@
 // import Player from './src/classes/player.js';
 import { locations } from '../content/locations.js';
-import Pickup from './pickup.js';
+// import Pickup from './pickup.js';
+import EnvObject from './env-object.js'
 import Location from './location.js';
 import P2PHandler from '../p2p/index.js'
 import * as playerClasses from './player-classes.js'
@@ -17,6 +18,8 @@ export default class Game {
     
     this.items = {}
     this.enemies = {}
+    this.envObjects = {}
+    this.envObjectCount = 0
     this.pickups = {}
     this.pickupCount = 0
     this.enemyCount = 0
@@ -26,14 +29,24 @@ export default class Game {
     
     this.canvasHandler = new CanvasHandler(this, this.player, this.location, this.p2pHandler)  
 
-    setInterval(() => {
-      if (this.pickupCount < 100) {
-        const x = Math.floor(Math.random() * this.location.width)
-        const y = Math.floor(Math.random() * this.location.height)
-        this.addPickup(new Pickup({ x, y }))
-      }
-    }, 2000)
+    // add mushies to cut
+    while (this.envObjectCount < 1000) {
+      const x = Math.floor(Math.random() * this.location.width)
+      const y = Math.floor(Math.random() * this.location.height)
+      this.addEnvObject(new EnvObject({ x, y }))
+      this.envObjectCount += 1
+    }
+    
+    // add mushies per second
+    // setInterval(() => {
+    //   if (this.pickupCount < 100) {
+    //     const x = Math.floor(Math.random() * this.location.width)
+    //     const y = Math.floor(Math.random() * this.location.height)
+    //     this.addPickup(new Pickup({ x, y }))
+    //   }
+    // }, 2000)
 
+    // add baddies per location spawn rate
     // setInterval(() => {
     //   if (
     //     this.enemyMode !== 'peaceful'
@@ -115,5 +128,22 @@ export default class Game {
 
     this.pickups[pickup.name] = this.pickups[pickup.name].filter(i => i.id !== pickup.id)
     this.pickupCount -= 1
+  }
+
+  addEnvObject(envObject) {
+    if (!this.envObjects[envObject.name]) {
+      this.envObjects[envObject.name] = []
+    }
+    this.envObjects[envObject.name].push(envObject)
+    this.envObjectCount += 1
+  }
+
+  removeEnvObject(envObject) {
+    if (!this.envObjects[envObject.name]) {
+      return
+    }
+
+    this.envObjects[envObject.name] = this.envObjects[envObject.name].filter(i => i.id !== envObject.id)
+    this.envObjectCount -= 1
   }
 }
