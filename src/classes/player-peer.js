@@ -29,17 +29,14 @@ class PlayerPeer {
     }
     this.status = 'active'
     this.lastUpdated = new Date().getTime()
-    // console.log('updated position for', this.id, this.position)
   }
 
   updateData({ className, stats, weapon, data }) {
-    // console.warn('updateData', { className, stats, weapon, data })
     this.className = className
     this.stats = stats
     this.weapon = weapon
     this.name = data.name
     this.color = data.color
-    // console.warn(this.className, this.stats, this,weapon)
   }
 
   sendData(data) {

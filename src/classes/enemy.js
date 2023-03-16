@@ -1,13 +1,3 @@
-import { generateEnemyData } from '../helpers/generators.js';
+import BaseGameObject from './base-game-object.js';
 
-class Enemy {
-  constructor(initialEnemyData) {
-    const enemyData = generateEnemyData(initialEnemyData)
-
-    Object.keys(enemyData).forEach(key => {
-      this[key] = enemyData[key]
-    })
-  }
-}
-
-export default Enemy
+export default class Enemy extends BaseGameObject {}

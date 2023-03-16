@@ -1,17 +1,4 @@
-import { generateWeaponData } from '../helpers/generators.js';
+import BaseGameObject from './base-game-object.js';
 
-class Weapon {
-  constructor(initialWeaponData) {
-    this.id = Math.floor(Math.random() * 1000000)
+export default class Weapon extends BaseGameObject {}
 
-    const weaponData = generateWeaponData(initialWeaponData)
-    Object.keys(weaponData).forEach(key => {
-      console.log(key, weaponData[key])
-      this[key] = weaponData[key]
-    })
-
-    // if (!this.imageUrl) this.imageUrl = './src/assets/images/weapons/greatsword.png'
-  }
-}
-
-export default Weapon;

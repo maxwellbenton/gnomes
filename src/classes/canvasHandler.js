@@ -3,46 +3,18 @@ import foods from '../content/foods.js'
 import environmentObjects from '../content/environment-objects.js'
 import { weaponRotationRate } from '../constants/index.js'
 import Pickup from './pickup.js'
+import { generatePickupData } from '../helpers/generators.js'
+import { safeDo } from '../helpers/index.js'
+import {
+  drawRect,
+  drawText,
+  loadImage, 
+  reassignExtremeAngles, 
+  rotateAndCache,
+  shouldTurnClockwise, 
+  turnWeapon 
+} from '../helpers/canvas.js'
 
-function safeDo(fn, ...args) {
-  try {
-    return fn(...args)
-  } catch (e) { console.error('GNOMETHING HAS WRONGED', e)}
-}
-
-async function loadImage(filePath) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-
-    img.onload = function () {
-      resolve(img)
-    };
-  
-    img.src = filePath;
-  })
-}
-
-function turnClockwise(alpha, beta) {
-  const delta = 360 - alpha
-  beta = beta + delta
-  beta = beta % 360
-  return beta < 180 ? true : false
-}
-
-function turnWeapon(target, currentAngle, actualAngle, change) {
-  if (Math.abs(currentAngle - actualAngle) < change || Math.abs(actualAngle - currentAngle) < change) {
-    target.position.viewAngle = actualAngle
-  } else {
-    if (turnClockwise(currentAngle + 180, actualAngle + 180)) {
-      target.position.viewAngle += change
-    } else {
-      target.position.viewAngle -= change
-    }
-  }
-  
-  if (target.position.viewAngle > 180) target.position.viewAngle -= 360
-  if (target.position.viewAngle < -180) target.position.viewAngle += 360
-}
 
 export default class CanvasHandler {
   constructor(game, player, location, p2pHandler) {
@@ -88,8 +60,6 @@ export default class CanvasHandler {
       this.mouse.x = e.clientX
       this.mouse.y = e.clientY
     })
-
-    
     
     document.addEventListener('keydown', (event) => {
       this.keysPressed[event.key] = true;
@@ -113,23 +83,6 @@ export default class CanvasHandler {
     // this.gameLoop()
   }
 
-  rotateAndCache(image, angle) {
-    var offscreenCanvas = document.createElement('canvas');
-    var offscreenCtx = offscreenCanvas.getContext('2d');
-  
-    var size = Math.max(image.width, image.height) * 2;
-    offscreenCanvas.width = size;
-    offscreenCanvas.height = size;
-  
-    offscreenCtx.translate(size/2, size/2);
-    offscreenCtx.rotate(angle + Math.PI/2);
-    offscreenCtx.drawImage(image, -(image.width/2), 0);
-  
-    return offscreenCanvas;
-  }
-
-  
-
   async getImages(...imagesToLoad) {
     this.backgroundImage = await safeDo(loadImage, this.location.backgroundUrl)
     this.playerImage = await safeDo(loadImage, this.player.imageUrl)
@@ -151,30 +104,15 @@ export default class CanvasHandler {
     this.imagesLoaded = true
   }
 
-  drawRect(x, y, width, height, color) {
-    this.ctx.beginPath();
-    this.ctx.fillStyle = color
-    this.ctx.fillRect(x, y, width, height);
-
-    this.ctx.fill();
-    
-  }
-
-  drawText(text, x, y, size, color) {
-    this.ctx.fillStyle = color;
-    this.ctx.font = `${size}px Arial`;
-    this.ctx.fillText(text, x, y);
-  }
-
   drawBackground() {
-    this.drawRect(0, 0, this.canvas.width, this.canvas.height, this.backgroundColor)
+    this.drawRect(this.ctx, 0, 0, this.canvas.width, this.canvas.height, this.backgroundColor)
   }
 
   drawLocation() {
     if (this.backgroundImage) {
       this.ctx.drawImage(this.backgroundImage, this.offsetX, this.offsetY)
     } else {
-      this.drawRect(this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
+      this.drawRect(this.ctx, this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
     }
   }
 
@@ -293,6 +231,7 @@ export default class CanvasHandler {
       }
     } else {
       this.drawRect(
+        this.ctx, 
         (this.canvas.width / 2) - (this.playerWidth / 2), 
         (this.canvas.height / 2) - (this.playerHeight / 2), 
         this.playerWidth, 
@@ -302,6 +241,7 @@ export default class CanvasHandler {
     }
 
     this.drawText(
+      this.ctx,
       this.player.data.name,
       (this.canvas.width / 2) - (this.playerWidth / 2),
       (this.canvas.height / 2) - (this.playerHeight / 2) + 24,
@@ -310,6 +250,7 @@ export default class CanvasHandler {
     )
 
     this.drawText(
+      this.ctx,
       this.player.className,
       (this.canvas.width / 2) - (this.playerWidth / 2),
       (this.canvas.height / 2) - (this.playerHeight / 2) + 36,
@@ -357,7 +298,7 @@ export default class CanvasHandler {
 
     // draw image
     // if (this.weaponImage) {
-    //   const rotatedWeapon = this.rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
+    //   const rotatedWeapon = rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
     //   context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
     // }
   }
@@ -376,7 +317,7 @@ export default class CanvasHandler {
   // drawItems() {
   //   Object.keys(this.game.items).forEach(itemName => {
   //     this.game.items[itemName].forEach(item => {
-  //       this.drawRect((this.canvas.width / 2) + item.position.rx, (this.canvas.height / 2) + item.position.ry, 5, 5, 'red')
+  //       this.drawRect(this.ctx, (this.canvas.width / 2) + item.position.rx, (this.canvas.height / 2) + item.position.ry, 5, 5, 'red')
   //     })
   //   })
   // }
@@ -412,10 +353,11 @@ export default class CanvasHandler {
 
       const peerX = this.offsetX + peer.position.x
       const peerY = this.offsetY + peer.position.y
-      this.drawRect(peerX, peerY, 16, 16, peer.color || 'white')
+      this.drawRect(this.ctx, peerX, peerY, 16, 16, peer.color || 'white')
 
       if (peer.name) {
         this.drawText(
+          this.ctx,
           peer.name,
           peerX,
           peerY + 24,
@@ -426,6 +368,7 @@ export default class CanvasHandler {
       
       if (peer.className) {
         this.drawText(
+          this.ctx,
           peer.className,
           peerX,
           peerY + 36,
@@ -449,14 +392,13 @@ export default class CanvasHandler {
         if (Math.abs(peer.position.viewAngle - actualAngle) < change || Math.abs(actualAngle - peer.position.viewAngle) < change) {
           peer.position.viewAngle = actualAngle
         } else {
-          if (turnClockwise(peer.position.viewAngle + 180, actualAngle + 180)) {
+          if (shouldTurnClockwise(peer.position.viewAngle + 180, actualAngle + 180)) {
             peer.position.viewAngle += change
           } else {
             peer.position.viewAngle -= change
           }
         }
-        if (peer.position.viewAngle > 180) peer.position.viewAngle -= 360
-        if (peer.position.viewAngle < -180) peer.position.viewAngle += 360
+        peer.position.viewAngle = reassignExtremeAngles(peer.position.viewAngle)
         
         peer.weapon.draw = weapons[peer.weapon.name].draw
         this.drawWeapon({ 
@@ -561,7 +503,7 @@ export default class CanvasHandler {
                 && offsetPointY > envObjectY 
                 && offsetPointY < envObjectY + 30
               ) {
-                this.game.addPickup(new Pickup({ x: envObject.x, y: envObject.y }))
+                this.game.addPickup(new Pickup({ x: envObject.x, y: envObject.y }, generatePickupData))
                 this.game.envObjects[envObjectsId] = this.game.envObjects[envObjectsId].filter(obj => obj.id !== envObject.id)
               }
             })

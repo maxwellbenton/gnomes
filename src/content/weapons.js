@@ -1,10 +1,3 @@
-function reassignExtremeAngles(angle) {
-  if (angle > -180 && angle <= 180) return angle
-  if (angle < -180) angle += 360
-  if (angle > 180) angle -= 360
-  return angle
-}
-
 function drawLine({ 
   context, 
   weapon: { 

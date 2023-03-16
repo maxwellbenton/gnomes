@@ -1,5 +1,9 @@
 // import Player from './src/classes/player.js';
 import { locations } from '../content/locations.js';
+import { 
+  generateEnvObjectData,
+  generateLocationData
+} from '../helpers/generators.js';
 // import Pickup from './pickup.js';
 import EnvObject from './env-object.js'
 import Location from './location.js';
@@ -25,7 +29,7 @@ export default class Game {
     this.enemyCount = 0
     this.enemyMode = 'aggressive'
 
-    this.location = new Location(locations.debugArena, this.player)
+    this.location = new Location(locations.debugArena, generateLocationData)
     
     this.canvasHandler = new CanvasHandler(this, this.player, this.location, this.p2pHandler)  
 
@@ -33,7 +37,7 @@ export default class Game {
     while (this.envObjectCount < 1000) {
       const x = Math.floor(Math.random() * this.location.width)
       const y = Math.floor(Math.random() * this.location.height)
-      this.addEnvObject(new EnvObject({ x, y }))
+      this.addEnvObject(new EnvObject({ x, y }, generateEnvObjectData))
       this.envObjectCount += 1
     }
     
@@ -58,20 +62,20 @@ export default class Game {
     //   }
     // }, this.location.levels[this.location.level].spawnRate)
 
-    console.log(this.enemies)
-    console.log('location', this.location)
-    console.log(this.player.constructor.name.replace('Gnome', ''))
-    console.log('speed', this.player.stats.speed)
-    console.log('weapon', this.player.equipped.weapons.primary.name)
-    console.log('weapon length', this.player.equipped.weapons.primary.length)
-    console.log('weapon width', this.player.equipped.weapons.primary.width)
-    console.log('weapon color', this.player.equipped.weapons.primary.color)
-    console.log('weapon weight', this.player.equipped.weapons.primary.weight)
-    console.log('weapon damage', this.player.equipped.weapons.primary.damage)
+    // console.log(this.enemies)
+    // console.log('location', this.location)
+    // console.log(this.player.constructor.name.replace('Gnome', ''))
+    // console.log('speed', this.player.stats.speed)
+    // console.log('weapon', this.player.equipped.weapons.primary.name)
+    // console.log('weapon length', this.player.equipped.weapons.primary.length)
+    // console.log('weapon width', this.player.equipped.weapons.primary.width)
+    // console.log('weapon color', this.player.equipped.weapons.primary.color)
+    // console.log('weapon weight', this.player.equipped.weapons.primary.weight)
+    // console.log('weapon damage', this.player.equipped.weapons.primary.damage)
 
 
     // console.log('armor', this.player.equipped.armor.name)
-    console.log('health', this.player.stats.health)
+    // console.log('health', this.player.stats.health)
     // console.log('damage', this.player.stats.damage)
     // console.log('weight', this.player.stats.weight)
     

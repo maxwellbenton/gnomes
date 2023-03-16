@@ -1,14 +1,4 @@
-import { generateEnvObjectData } from '../helpers/generators.js';
+import BaseGameObject from './base-game-object.js';
 
-class EnvObject {
-  constructor(initialEnvObjectData) {
-    this.id = Math.floor(Math.random() * 1000000)
+export default class EnvObject extends BaseGameObject {}
 
-    const envObjectData = generateEnvObjectData(initialEnvObjectData)
-    Object.keys(envObjectData).forEach(key => {
-      this[key] = envObjectData[key]
-    })
-  }
-}
-
-export default EnvObject;

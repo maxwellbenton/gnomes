@@ -59,3 +59,9 @@ export function chooseRandomEnvObj() {
   const objectId = objectIds[Math.floor(Math.random() * objectIds.length)]
   return environmentObjects[objectId]
 }
+
+export function safeDo(fn, ...args) {
+  try {
+    return fn(...args)
+  } catch (e) { console.error('GNOMETHING HAS WRONGED', e)}
+}

@@ -1,12 +1,4 @@
-import { generateLocationData } from '../helpers/generators.js';
 
-class Location {
-  constructor(initialLocationData) {
-    const locationData = generateLocationData(initialLocationData)
-    Object.keys(locationData).forEach(key => {
-      this[key] = locationData[key]
-    })
-  }
-}
+import BaseGameObject from './base-game-object.js';
 
-export default Location
+export default class Location extends BaseGameObject {}
