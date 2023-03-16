@@ -9,7 +9,7 @@ import EnvObject from './env-object.js'
 import Location from './location.js';
 import P2PHandler from '../p2p/index.js'
 import * as playerClasses from './player-classes.js'
-import CanvasHandler from './canvasHandler.js'
+import CanvasHandler from './canvas-handler.js'
 
 const classes = Object.values(playerClasses)
 

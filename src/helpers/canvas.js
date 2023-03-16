@@ -66,3 +66,46 @@ export function drawText(context, text, x, y, size, color) {
   context.font = `${size}px Arial`;
   context.fillText(text, x, y);
 }
+
+export function drawObjects({ game, objectType, context, images, offsetX, offsetY }) {
+  Object.keys(game[objectType]).forEach(type => {
+    game[objectType][type].forEach(object => {
+      try {
+        context.drawImage(
+          images[objectType][object.name], 
+          offsetX + object.x, 
+          offsetY + object.y
+        )
+      } catch (e) {
+        console.warn(images[objectType], object.name)
+        console.log(e)
+      }
+    })
+  })
+}
+
+export function drawBackground(context, canvas, color) {
+  drawRect(context, 0, 0, canvas.width, canvas.height, color)
+}
+
+export function drawWeapon({ weapon, context, target, center }) {
+  // draw backup canvas shape
+  weapon.offsets = weapon.getHitboxPoints({ weapon, context, target, center })
+  weapon.draw({ weapon, context, offsets: weapon.offsets })
+
+  // draw image
+  // if (this.weaponImage) {
+  //   const rotatedWeapon = rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
+  //   context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
+  // }
+}
+
+export function drawWeapons({ weapon, context, target, center }) {
+  if (!weapon) return
+  drawWeapon({
+    weapon, 
+    context, 
+    target, 
+    center
+  })
+}

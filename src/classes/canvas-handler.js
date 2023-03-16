@@ -6,14 +6,21 @@ import Pickup from './pickup.js'
 import { generatePickupData } from '../helpers/generators.js'
 import { safeDo } from '../helpers/index.js'
 import {
+  drawBackground,
   drawRect,
   drawText,
+  drawObjects,
+  drawWeapons,
   loadImage, 
   reassignExtremeAngles, 
   rotateAndCache,
   shouldTurnClockwise, 
   turnWeapon 
 } from '../helpers/canvas.js'
+import {
+  pickupHitDetection,
+  weaponHitDetection
+} from '../helpers/collision.js'
 
 
 export default class CanvasHandler {
@@ -44,6 +51,7 @@ export default class CanvasHandler {
 
 
     this.keysPressed = {}
+    this.keyUp = {}
     this.mouse = {
       x: 0,
       y: 0
@@ -67,6 +75,7 @@ export default class CanvasHandler {
     
     document.addEventListener('keyup', (event) => {
       this.keysPressed[event.key] = false;
+      this.keyUp[event.key] = true;
     });
 
     this.backgroundImage = null
@@ -78,7 +87,7 @@ export default class CanvasHandler {
     
 
     this.backgroundColor = 'black'
-    this.drawBackground()
+    drawBackground(this.ctx, this.canvas, this.backgroundColor)
 
     // this.gameLoop()
   }
@@ -88,13 +97,13 @@ export default class CanvasHandler {
     this.playerImage = await safeDo(loadImage, this.player.imageUrl)
     this.weaponImage = await loadImage(this.player.equipped.weapons.primary.imageUrl)
     
-    this.images.foods = {}
+    this.images.pickups = {}
     this.images.envObjects = {}
 
     await Promise.all([].concat(
       Object.keys(foods).map(async (food) => {
-        this.images.foods[food] = await loadImage(foods[food].imageUrl)
-        return this.images.foods[food]
+        this.images.pickups[food] = await loadImage(foods[food].imageUrl)
+        return this.images.pickups[food]
       }),
       Object.keys(environmentObjects).map(async (envObject) => {
         this.images.envObjects[envObject] = await loadImage(environmentObjects[envObject].imageUrl) 
@@ -104,15 +113,11 @@ export default class CanvasHandler {
     this.imagesLoaded = true
   }
 
-  drawBackground() {
-    this.drawRect(this.ctx, 0, 0, this.canvas.width, this.canvas.height, this.backgroundColor)
-  }
-
   drawLocation() {
     if (this.backgroundImage) {
       this.ctx.drawImage(this.backgroundImage, this.offsetX, this.offsetY)
     } else {
-      this.drawRect(this.ctx, this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
+      drawRect(this.ctx, this.offsetX, this.offsetY, this.location.width, this.location.height, 'blue')
     }
   }
 
@@ -230,7 +235,7 @@ export default class CanvasHandler {
           )
       }
     } else {
-      this.drawRect(
+      drawRect(
         this.ctx, 
         (this.canvas.width / 2) - (this.playerWidth / 2), 
         (this.canvas.height / 2) - (this.playerHeight / 2), 
@@ -240,7 +245,7 @@ export default class CanvasHandler {
       )
     }
 
-    this.drawText(
+    drawText(
       this.ctx,
       this.player.data.name,
       (this.canvas.width / 2) - (this.playerWidth / 2),
@@ -249,7 +254,7 @@ export default class CanvasHandler {
       'white'
     )
 
-    this.drawText(
+    drawText(
       this.ctx,
       this.player.className,
       (this.canvas.width / 2) - (this.playerWidth / 2),
@@ -259,68 +264,7 @@ export default class CanvasHandler {
     )
   }
 
-  drawEnvObjects() {
-    if (this.imagesLoaded) {
-      // console.warn('1')
-      Object.keys(this.game.envObjects).forEach(envObjectType => {
-        // console.warn('2', this.game.envObjects, envObjectType)
-        this.game.envObjects[envObjectType].forEach(envObject => {
-          try {
-            this.ctx.drawImage(
-              this.images.envObjects[envObject.name], 
-              this.offsetX + envObject.x, 
-              this.offsetY + envObject.y
-            )
-          } catch (e) { console.error(e) }
-        })
-      })
-    }
-  }
-
-  drawPickups() {
-    if (this.imagesLoaded) {
-      Object.keys(this.game.pickups).forEach(pickupType => {
-        this.game.pickups[pickupType].forEach(pickup => {
-          this.ctx.drawImage(
-            this.images.foods[pickup.name], 
-            this.offsetX + pickup.x, 
-            this.offsetY + pickup.y
-          )
-        })
-      })
-    }
-  }
-
-  drawWeapon({ weapon, context, target, center }) {
-    // draw backup canvas shape
-    weapon.offsets = weapon.getHitboxPoints({ weapon, context, target, center })
-    weapon.draw({ weapon, context, offsets: weapon.offsets })
-
-    // draw image
-    // if (this.weaponImage) {
-    //   const rotatedWeapon = rotateAndCache(this.weaponImage, this.player.position.viewAngle * (Math.PI / 180))
-    //   context.drawImage(rotatedWeapon, this.centerX - this.weaponImage.height, this.centerY - this.weaponImage.height)
-    // }
-  }
-
-  drawWeapons() {
-    if (!this.player.equipped.weapons.primary) return
-    const weapon = this.player.equipped.weapons.primary
-    this.drawWeapon({
-      weapon, 
-      context: this.ctx, 
-      target: this.player, 
-      center: { x: this.canvas.width / 2, y: this.canvas.height / 2 }
-    })
-  }
-
-  // drawItems() {
-  //   Object.keys(this.game.items).forEach(itemName => {
-  //     this.game.items[itemName].forEach(item => {
-  //       this.drawRect(this.ctx, (this.canvas.width / 2) + item.position.rx, (this.canvas.height / 2) + item.position.ry, 5, 5, 'red')
-  //     })
-  //   })
-  // }
+  
 
   drawPeers() {
     if (!this.p2pHandler.peerList.length) return
@@ -353,10 +297,10 @@ export default class CanvasHandler {
 
       const peerX = this.offsetX + peer.position.x
       const peerY = this.offsetY + peer.position.y
-      this.drawRect(this.ctx, peerX, peerY, 16, 16, peer.color || 'white')
+      drawRect(this.ctx, peerX, peerY, 16, 16, peer.color || 'white')
 
       if (peer.name) {
-        this.drawText(
+        drawText(
           this.ctx,
           peer.name,
           peerX,
@@ -367,7 +311,7 @@ export default class CanvasHandler {
       }
       
       if (peer.className) {
-        this.drawText(
+        drawText(
           this.ctx,
           peer.className,
           peerX,
@@ -445,6 +389,12 @@ export default class CanvasHandler {
       // this.player.position.movementDirection.x = 1
     }
 
+    if (this.keyUp['1']) {
+      // this.player.equipped.weapons.primary = this.player.inventory.weapons.primary[0]
+      console.log('ONE')
+      delete this.keyUp['1']
+    }
+
     if (this.player.position.x - (this.playerWidth / 2) < 0) this.player.position.x = this.playerWidth / 2
     if (this.player.position.y - (this.playerHeight / 2) < 0) this.player.position.y = this.playerHeight / 2
     if (this.player.position.x + (this.playerWidth / 2) > this.location.width) this.player.position.x = this.location.width - this.playerWidth / 2
@@ -460,86 +410,62 @@ export default class CanvasHandler {
     this.hitDetection()
   }
 
-  pickupHitDetection() {
-    Object.keys(this.game.pickups).forEach(pickupId => {
-      this.game.pickups[pickupId].forEach(pickup => {
-        const pickupX = this.offsetX + pickup.x
-        const pickupY = this.offsetY + pickup.y
-        const playerX = this.offsetX + this.player.position.x
-        const playerY = this.offsetY + this.player.position.y
-        if (playerX > pickupX - 100 && playerX < pickupX + 100 && playerY > pickupY - 100 && playerY < pickupY + 100) {
-          pickup.x += (playerX - pickupX) > 0 ? 5 : -5
-          pickup.y += (playerY - pickupY) > 0 ? 5 : -5
-        }
-
-        if (playerX > pickupX - 16 && playerX < pickupX + 16 && playerY > pickupY - 16 && playerY < pickupY + 16) {
-          this.game.pickups[pickupId].splice(this.game.pickups[pickupId].indexOf(pickup), 1)
-          this.player.inventory.items.push(pickup)
-        }
-      })
-    })
-  }
-
-  weaponHitDetection() {
-    Object.keys(this.game.envObjects).forEach(envObjectsId => {
-      this.game.envObjects[envObjectsId].forEach(envObject => {
-        if (!this.player.equipped.weapons.primary.offsets) return
-        const envObjectX = envObject.x
-        const envObjectY = envObject.y
-        const playerX = this.player.position.x
-        const playerY = this.player.position.y
-        if (playerX > envObjectX - 30 && playerX < envObjectX + 30 && playerY > envObjectY - 30 && playerY < envObjectY + 30) {
-          // console.warn(envObject)
-          const offsets = this.player.equipped.weapons.primary.offsets
-          // console.warn(envObjectX, envObject  , this.player.equipped.weapons.primary.offsets)
-
-          Object.keys(offsets).forEach(offsetType => {
-            Object.keys(offsets[offsetType]).forEach(point => {
-              const offsetPointX = this.centerX - offsets[offsetType][point].tx + this.player.position.x
-              const offsetPointY = this.centerY - offsets[offsetType][point].ty + this.player.position.y
-              if (
-                offsetPointX > envObjectX 
-                && offsetPointX < envObjectX + 16 
-                && offsetPointY > envObjectY 
-                && offsetPointY < envObjectY + 30
-              ) {
-                this.game.addPickup(new Pickup({ x: envObject.x, y: envObject.y }, generatePickupData))
-                this.game.envObjects[envObjectsId] = this.game.envObjects[envObjectsId].filter(obj => obj.id !== envObject.id)
-              }
-            })
-          })
-
-
-        }
-
-        // if (playerX > envObjectsX - 16 && playerX < envObjectsX + 16 && playerY > envObjectsY - 16 && playerY < envObjectsY + 16) {
-        //   this.game.envObjects[envObjectsId].splice(this.game.envObjects[envObjectsId].indexOf(envObjects), 1)
-        //   this.player.inventory.items.push(envObjects)
-        // }
-      })
-    })
-  }
-
   hitDetection() {
-    this.pickupHitDetection()
-    this.weaponHitDetection()
+    pickupHitDetection({
+      objects: this.game.pickups,
+      player: this.player,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      center: { x: this.centerX, y: this.centerY },
+      game: this.game
+    })
+    weaponHitDetection({ 
+      objects: this.game.envObjects, 
+      player: this.player, 
+      offsetX: this.offsetX, 
+      offsetY: this.offsetY, 
+      center: { x: this.centerX, y: this.centerY },
+      game: this.game 
+    })
   //   this.playerHitDetection()
   //   this.peerHitDetection()
   }
 
   gameLoop() {
     this.update();
-    // console.log(this.game.items)
-    // Clear the canvas
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.drawBackground();
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const drawData = {
+      context: this.ctx,
+      images: this.images,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY
+    }
+
+    drawBackground(this.ctx, this.canvas, this.backgroundColor);
     this.drawLocation();
-    this.drawEnvObjects();
-    this.drawPickups();
+
+    if (this.imagesLoaded) {
+      drawObjects({
+        game: this.game,
+        objectType: 'envObjects', 
+        ...drawData
+      })
+      drawObjects({
+        game: this.game,
+        objectType: 'pickups', 
+        ...drawData
+      })
+    }
+
     this.drawPlayer();
     this.drawPeers();
-    this.drawWeapons();
+    drawWeapons({
+      weapon: this.player.equipped.weapons.primary,
+      context: this.ctx,
+      target: this.player,
+      center: { x: this.centerX, y: this.centerY }
+    });
     window.requestAnimationFrame(this.gameLoop.bind(this));
   }
 }

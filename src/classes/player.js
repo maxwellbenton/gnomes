@@ -1,7 +1,7 @@
 import { defaultPlayerData, defaultPlayerPosition } from '../constants/index.js';
 import { generateStats, generateName } from '../helpers/generators.js';
-import { InventoryHandler } from './inventoryHandler.js';
-import EquipmentHandler from './equipmentHandler.js';
+import { InventoryHandler } from './inventory-handler.js';
+import EquipmentHandler from './equipment-handler.js';
 
 export default class Player {
   constructor() {
