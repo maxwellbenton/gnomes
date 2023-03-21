@@ -2,8 +2,6 @@ import weapons from '../content/weapons.js'
 import foods from '../content/foods.js'
 import environmentObjects from '../content/environment-objects.js'
 import { weaponRotationRate } from '../constants/index.js'
-import Pickup from './pickup.js'
-import { generatePickupData } from '../helpers/generators.js'
 import { safeDo } from '../helpers/index.js'
 import {
   drawBackground,
@@ -13,7 +11,6 @@ import {
   drawWeapons,
   loadImage, 
   reassignExtremeAngles, 
-  rotateAndCache,
   shouldTurnClockwise, 
   turnWeapon 
 } from '../helpers/canvas.js'
@@ -24,31 +21,35 @@ import {
 
 
 export default class CanvasHandler {
-  constructor(game, player, location, p2pHandler) {
+  constructor(game, player, location, p2pHandler, app) {
     this.game = game
     this.player = player
     this.p2pHandler = p2pHandler
     this.location = location
+    this.app = app
+    this.width = window.innerWidth
+    this.height = window.innerHeight
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    // this.canvas = document.createElement('canvas');
+    // this.width = window.innerWidth;
+    // this.height = window.innerHeight;
 
     this.playerWidth = 16
     this.playerHeight = 16
-    this.centerX = this.canvas.width / 2
-    this.centerY = this.canvas.height / 2
-    this.player.position.x = this.centerX - (this.playerWidth / 2)
-    this.player.position.y = this.centerY - (this.playerHeight / 2)
-
+    this.centerX = this.width / 2
+    this.centerY = this.height / 2
     this.player.position.x = this.location.startingX
     this.player.position.y = this.location.startingY
+
+    this.leftBound = this.player.position.x - this.centerX
+    this.rightBound = this.player.position.x + this.centerX
+    this.topBound = this.player.position.y - this.centerY
+    this.bottomBound = this.player.position.y + this.centerY
 
     this.offsetX = this.centerX - this.player.position.x
     this.offsetY = this.centerY - this.player.position.y
 
     this.player.position.viewAngle = 0
-
 
     this.keysPressed = {}
     this.keyUp = {}
@@ -57,17 +58,17 @@ export default class CanvasHandler {
       y: 0
     }
 
-    this.ctx = this.canvas.getContext('2d');
+    // this.ctx = this.canvas.getContext('2d');
 
-    document.querySelector('#game').innerHTML = ""
-    document.querySelector('#game').appendChild(this.canvas)
+    // document.querySelector('#game').innerHTML = ""
+    // document.querySelector('#game').appendChild(this.canvas)
 
-    this.canvas.focus()
+    // this.app.focus()
 
-    this.canvas.addEventListener('mousemove', (e) => {
-      this.mouse.x = e.clientX
-      this.mouse.y = e.clientY
-    })
+    // this.canvas.addEventListener('mousemove', (e) => {
+    //   this.mouse.x = e.clientX
+    //   this.mouse.y = e.clientY
+    // })
     
     document.addEventListener('keydown', (event) => {
       this.keysPressed[event.key] = true;
@@ -237,8 +238,8 @@ export default class CanvasHandler {
     } else {
       drawRect(
         this.ctx, 
-        (this.canvas.width / 2) - (this.playerWidth / 2), 
-        (this.canvas.height / 2) - (this.playerHeight / 2), 
+        (this.width / 2) - (this.playerWidth / 2), 
+        (this.height / 2) - (this.playerHeight / 2), 
         this.playerWidth, 
         this.playerHeight, 
         this.player.data.color
@@ -248,8 +249,8 @@ export default class CanvasHandler {
     drawText(
       this.ctx,
       this.player.data.name,
-      (this.canvas.width / 2) - (this.playerWidth / 2),
-      (this.canvas.height / 2) - (this.playerHeight / 2) + 24,
+      (this.width / 2) - (this.playerWidth / 2),
+      (this.height / 2) - (this.playerHeight / 2) + 24,
       10,
       'white'
     )
@@ -257,14 +258,12 @@ export default class CanvasHandler {
     drawText(
       this.ctx,
       this.player.className,
-      (this.canvas.width / 2) - (this.playerWidth / 2),
-      (this.canvas.height / 2) - (this.playerHeight / 2) + 36,
+      (this.width / 2) - (this.playerWidth / 2),
+      (this.height / 2) - (this.playerHeight / 2) + 36,
       10,
       'white'
     )
   }
-
-  
 
   drawPeers() {
     if (!this.p2pHandler.peerList.length) return
@@ -356,15 +355,15 @@ export default class CanvasHandler {
   }
 
   clear() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.width, this.height);
   }
   
   
 
   update() {
     const currentAngle = this.player.position.viewAngle
-    const playerMouseXDiff = (this.canvas.width / 2) - this.mouse.x
-    const playerMouseYDiff = (this.canvas.height / 2) - this.mouse.y
+    const playerMouseXDiff = (this.width / 2) - this.mouse.x
+    const playerMouseYDiff = (this.height / 2) - this.mouse.y
     const actualAngle = Math.atan2(playerMouseYDiff, playerMouseXDiff) * 180 / Math.PI
     const change = this.player.stats.strength / this.player.equipped.weapons.primary.weight * weaponRotationRate
     
@@ -400,6 +399,11 @@ export default class CanvasHandler {
     if (this.player.position.x + (this.playerWidth / 2) > this.location.width) this.player.position.x = this.location.width - this.playerWidth / 2
     if (this.player.position.y + (this.playerWidth / 2) > this.location.height) this.player.position.y = this.location.height - this.playerHeight / 2
 
+    this.leftBound = this.player.position.x - this.centerX
+    this.rightBound = this.player.position.x + this.centerX
+    this.topBound = this.player.position.y - this.centerY
+    this.bottomBound = this.player.position.y + this.centerY
+    
     this.p2pHandler.peerList.forEach(peerId => {
       const peer = this.p2pHandler.peerList[peerId]
     })
@@ -434,7 +438,7 @@ export default class CanvasHandler {
   gameLoop() {
     this.update();
 
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.width, this.height);
     const drawData = {
       context: this.ctx,
       images: this.images,

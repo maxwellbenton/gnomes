@@ -5,7 +5,6 @@ import {
   getRandomIntBetween
 } from './index.js';
 import { ARMOR, WEAPON, FOOD } from '../constants/index.js';
-import { locations } from '../content/locations.js';
 import { names } from '../content/names.js';
 
 export function generateWeaponData(initialWeaponData = chooseRandomItem(WEAPON)) {

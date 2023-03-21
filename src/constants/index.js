@@ -1,5 +1,6 @@
 import { generateHexColor, generateName } from '../helpers/generators.js'
 
+
 const itemActions = {
   attack: 'attack',
   defend: 'defend',
@@ -36,6 +37,9 @@ const weaponItemDefaults = {
 export const ARMOR = 'armor'
 export const WEAPON = 'weapon'
 export const FOOD = 'food'
+
+export const playerWidth = 16
+export const playerHeight = 16
 
 // export const conditions = {
 //   poor: 0.25,
@@ -79,13 +83,14 @@ export const defaultPlayerData = {
 }
 
 export const defaultPlayerPosition = {
-  x: 0,
-  y: 0,
+  rx: 0,
+  ry: 0,
+  rz: 0,
+  vx: 0,
+  vy: 0,
   viewAngle: 0,
-  movementDirection: {
-    x: 0,
-    y: 0
-  }
+  height: 16,
+  width: 16,
 }
 
 export const defaultWeapons = {

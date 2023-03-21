@@ -1,0 +1,63 @@
+{"frames": {
+
+"gnome-holding-down":
+{
+	"frame": {"x":1,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+},
+"gnome-holding-right":
+{
+	"frame": {"x":19,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+},
+"gnome-holding-up":
+{
+	"frame": {"x":37,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+},
+"gnome-standing-1":
+{
+	"frame": {"x":55,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+},
+"gnome-walking-1":
+{
+	"frame": {"x":73,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+},
+"gnome-walking-2":
+{
+	"frame": {"x":91,"y":1,"w":16,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":30},
+	"sourceSize": {"w":16,"h":30}
+}},
+"animations": {
+	"gnome-walking": ["gnome-walking-1","gnome-walking-2"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "gnome-player-1.png",
+	"format": "RGBA8888",
+	"size": {"w":108,"h":32},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:f57eaa7ff6958426809227f98b57d806:280fbe411caaf47e789e7980319696dc:ebe7ee83e65b6c045d3e3a33d1b763a6$"
+}
+}

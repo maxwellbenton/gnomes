@@ -11,6 +11,7 @@ export default class Player {
     this.equipped = new EquipmentHandler(this)
     this.data = defaultPlayerData
     this.stats = generateStats()
+    this.currentHealthPercent = 1
     this.position = defaultPlayerPosition
     this.location = 'home'
     this.friends = {}
