@@ -64,16 +64,25 @@ export function weaponHitDetection({ objects, player, offsetX, offsetY, center, 
   })
 }
 
-export function weaponHitDetection({ object, weapon, offsetX, offsetY, center, game }) {
+// export function weaponHitDetection({ object, weapon, offsetX, offsetY, center, game }) {
   // return hitTestRectangle(object, {
   //   x: center.x - 8,
   //   y: center.y - 8,
   //   width: 16,
   //   height: 16
   // })
+// }
+
+export function inPlayerArea({ object, center }) {
+  return hitTestRectangle(object, {
+    x: center.x - 50,
+    y: center.y - 50,
+    width: 100,
+    height: 100
+  })
 }
 
-export function playerHitDetection({ object, player, offsetX, offsetY, center, game }) {
+export function playerHitDetection({ object, center }) {
   return hitTestRectangle(object, {
     x: center.x - 8,
     y: center.y - 8,

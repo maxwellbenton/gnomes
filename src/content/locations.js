@@ -3,10 +3,10 @@ const defaults = {
   name: 'Debug Arena',
   description: 'A debug arena.',
   backgroundUrl: './src/assets/images/backgrounds/debug.png',
-  width: 1028,
-  height: 1028,
-  startingX: 512,
-  startingY: 512,
+  width: 2048,
+  height: 2048,
+  startingX: 1024,
+  startingY: 1024,
   level: 1,
   levels: {
     1: {
@@ -65,11 +65,11 @@ export const locations = {
     description: 'field',
     backgroundUrl: './src/assets/images/backgrounds/field.png'
   },
-  beach: {
+  granite: {
     ...defaults,
-    name: 'beach',
-    description: 'beach',
-    backgroundUrl: './src/assets/images/backgrounds/beach.png'
+    name: 'granite',
+    description: 'granite',
+    backgroundUrl: './src/assets/images/backgrounds/granite.png'
   },
   dirt: {
     ...defaults,

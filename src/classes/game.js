@@ -23,7 +23,12 @@ export default class Game {
     // this.graphics = new PIXI.Graphics();
     this.locations = {
       home: new Location(locations.home, generateLocationData),
-      forest: new Location(locations.debugArena, generateLocationData)
+      forest: new Location(locations.debugArena, generateLocationData),
+      debugArena: new Location(locations.debugArena, generateLocationData),
+      beach: new Location(locations.beach, generateLocationData),
+      flatlands: new Location(locations.desert, generateLocationData),
+      granite: new Location(locations.granite, generateLocationData),
+      field: new Location(locations.field, generateLocationData)
     }
     this.location = this.locations.home
 

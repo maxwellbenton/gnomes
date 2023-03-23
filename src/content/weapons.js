@@ -53,8 +53,11 @@ const defaults = {
     return {
       centerOffsets: {
         base: calculatePointData(length * 0.1, viewAngle, center),
+        quarter: calculatePointData(length * 0.25, viewAngle, center),
         mid: calculatePointData(length / 2, viewAngle, center),
+        sixtyFive: calculatePointData(length * 0.65, viewAngle, center),
         threeQuarters: calculatePointData(length * 0.75, viewAngle, center),
+        ninetyFive: calculatePointData(length * 0.95, viewAngle, center),
         tip: calculatePointData(length, viewAngle, center),
       }
     }
